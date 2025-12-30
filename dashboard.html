@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head><title>Channel Manager</title>
+<style>body{font-family:Arial;margin:40px;}button{padding:10px20px;margin:10px;background:#007cba;color:white;border:none;cursor:pointer;}pre{background:#f4f4f4;padding:20px;border-radius:5px;max-height:400px;overflow:auto;}</style>
+</head>
+<body>
+<h1>🏨 Channel Manager</h1>
+<button onclick="loadData()">🔄 Refresh</button>
+<button onclick="updateInventory(3)">📊 3 Rooms Available</button>
+<button onclick="pullBookings()">📥 Pull OTAs</button>
+<button onclick="pushRate(120)">💰 Rate $120</button>
+
+<h2>Bookings:</h2><pre id="bookings">Click Refresh...</pre>
+<h2>Inventory:</h2><pre id="inventory">Click Refresh...</pre>
+
+<script>
+async function loadData(){try{
+  const b=await(await fetch('http://127.0.0.1:5000/bookings/pull')).json();
+  document.getElementById('bookings').textContent=JSON.stringify(b,null,2);
+  document.getElementById('inventory').textContent=`room101: ${10-b.length} available`;
+}catch(e){document.getElementById('bookings').textContent='Server offline - run: python app.py'}}
+async function updateInventory(u){await fetch('http://127.0.0.1:5000/inventory/update',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({room_id:'room101',available_units:u})});loadData();}
+async function pullBookings(){await fetch('http://127.0.0.1:5000/bookings/pull',{method:'POST'});loadData();}
+async function pushRate(p){await fetch('http://127.0.0.1:5000/rates/push',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({room_id:'room101',price:p})});alert('✅ Rate pushed!');}
+loadData();
+</script>
+</body>
+</html>
